@@ -14,7 +14,7 @@ event sendTempHumiBtn(void);
 // array de ponteiros para as funcoes dos estados
 event (* state_functions[])(void) = {connectWifi, connectServer, waitEvent, sendTempHumiTime, sendTempHumiBtn}; // Estrutura ninja. Ponteiro para funcao. Armazenamento da funcao em endereco de memoria. Array para buscar funcoes na memoria.
 // definicao dos nomes dos estados
-typedef enum state_ {connectWifi, connectServer, collectTempHumi, sendTempHumiTime, sendTempHumiBtn} state; // off: valor 0, on: valor 1 e end: valor 2.
+typedef enum state_ {connectWifi, connectServer, waitEvent, sendTempHumiTime, sendTempHumiBtn} state; // off: valor 0, on: valor 1 e end: valor 2.
 
 // estrutura que define as transicoes dos estados
 state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, connectServer}, // Implementar transicoes entre estados. Matriz Estados X Eventos. 
