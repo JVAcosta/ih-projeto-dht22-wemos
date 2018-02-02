@@ -1,8 +1,23 @@
 #include "fsm_config.h"
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
+// Update these with values suitable for your network.
+
+const char* ssid = "jualabs";
+const char* password = "jualabsufrpe";
+const char* mqtt_server = "things.ubidots.com";
 const int buttonPin = D5;    // definicao do pino utilizado pelo botao
-const int ledPin = D7;       // definicao do pino utilizado pelo led
+const int ledPin = D7;
 
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+int i = 0;
+long lastMsg = 0;
+char msg[50];
+int value = 0;
 int buttonState = LOW;             // armazena a leitura atual do botao
 int lastButtonState = LOW;         // armazena a leitura anterior do botao
 unsigned long lastDebounceTime = 0;  // armazena a ultima vez que a leitura da entrada variou
@@ -26,9 +41,41 @@ event on_state(void) {
     return repeat;
 }
 
-event end_state(void) {
+
+event connectWifi(void) {
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  return wifiIsConneceted;
+}
+event connectServer(void) {
   
 }
+event waitEvent(void) {
+  
+}
+event sendTempHumiTime(void) {
+  
+}
+event sendTempHumiBtn(void) {
+  
+}
+
 
 // variaveis que armazenam estado atual, evento atual e funcao de tratamento do estado atual
 state cur_state = ENTRY_STATE;
@@ -57,8 +104,10 @@ int read_button() {
 }
 
 void setup() {
+  Serial.begin(115200);
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
+  client.setServer(mqtt_server, 1883);
 }
 
 void loop() {
