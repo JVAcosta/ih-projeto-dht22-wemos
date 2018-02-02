@@ -32,7 +32,7 @@
 
 
 //Constants
-#define DHTPIN 2     // what pin we're connected to
+#define DHTPIN D4     // what pin we're connected to
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 
