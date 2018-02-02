@@ -1,8 +1,8 @@
 #define NUM_STATES 5 // Numero de estados da maquina.
-#define NUM_EVENTS 3 // Numero de eventos da maquina.
+#define NUM_EVENTS 5 // Numero de eventos da maquina.
 
 // definicao dos possiveis eventos gerados pelos estados da FSM
-typedef enum event_ {btn_pressed, time10, connection} event; // Typedef: criando e definindo um novo tipo. Enum: btn_pressed: valor 0 e repeat: valor 1. (Eventos dos estados da maquina)  
+typedef enum event_ {btn_pressed, time10, wifiIsConneceted, serverIsConneceted, reconnect} event; // Typedef: criando e definindo um novo tipo. Enum: btn_pressed: valor 0 e repeat: valor 1. (Eventos dos estados da maquina)  
 
 // definicao das funcoes que implementam o comportamento de cada estado
 event connectWifi(void); 
@@ -17,11 +17,11 @@ event (* state_functions[])(void) = {connectWifi, connectServer, waitEvent, send
 typedef enum state_ {connectWifi, connectServer, waitEvent, sendTempHumiTime, sendTempHumiBtn} state; // off: valor 0, on: valor 1 e end: valor 2.
 
 // estrutura que define as transicoes dos estados
-state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, connectServer}, // Implementar transicoes entre estados. Matriz Estados X Eventos. 
-                                                   {connectServer, connectServer, waitEvent},
-                                                   {sendTempHumiBtn, sendTempHumiTime, waitEvent},
-                                                   {sendTempHumiTime, sendTempHumiTime, connectWifi},
-                                                   {sendTempHumiBtn,sendTempHumiBtn, connectWifi},
+state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, connectServer, connectWifi, connectWifi}, // Implementar transicoes entre estados. Matriz Estados X Eventos. 
+                                                   {connectServer, connectServer, connectServer, waitEvent, connectServer},//
+                                                   {sendTempHumiBtn, sendTempHumiTime, waitEvent, waitEvent, waitEvent},
+                                                   {sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, connectWifi},
+                                                   {sendTempHumiBtn,sendTempHumiBtn, sendTempHumiBtn, sendTempHumiBtn, connectWifi},
                                                    };
 // definicao dos estados inicial e final
 #define EXIT_STATE connectWifi //trocar caso for ter um estado de saida
