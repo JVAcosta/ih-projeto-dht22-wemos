@@ -1,3 +1,7 @@
+
+
+
+
 #include "fsm_config.h"
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -50,22 +54,37 @@ event connectWifi(void) {
   Serial.println(ssid);
 
   WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED){
     delay(500);
     Serial.print(".");
+    return reconnectWifi
+  } else {
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    return wifiIsConneceted;
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  return wifiIsConneceted;
-}
 event connectServer(void) {
+  Serial.print("Attempting MQTT connection...");
+  if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
+      Serial.println("connected");
+      client.subscribe("inTopic");
+      return serverIsConneceted
+
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+      return reconnectServer
+    }
+
   
 }
+
 event waitEvent(void) {
   
 }

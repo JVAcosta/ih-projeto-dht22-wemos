@@ -1,5 +1,5 @@
 #define NUM_STATES 5 // Numero de estados da maquina.
-#define NUM_EVENTS 5 // Numero de eventos da maquina.
+#define NUM_EVENTS 6 // Numero de eventos da maquina.
 
 // definicao dos possiveis eventos gerados pelos estados da FSM
 typedef enum event_ {btn_pressed, time10, wifiIsConneceted, serverIsConneceted, reconnectWifi, reconnectServer} event; // Typedef: criando e definindo um novo tipo. Enum: btn_pressed: valor 0 e repeat: valor 1. (Eventos dos estados da maquina)  
