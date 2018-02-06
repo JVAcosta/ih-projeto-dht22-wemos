@@ -14,14 +14,14 @@ event sendTempHumiBtn_state(void);
 // array de ponteiros para as funcoes dos estados
 event (* state_functions[])(void) = {connectWifi_state, connectServer_state, waitEvent_state, sendTempHumiTime_state, sendTempHumiBtn_state}; // Estrutura ninja. Ponteiro para funcao. Armazenamento da funcao em endereco de memoria. Array para buscar funcoes na memoria.
 // definicao dos nomes dos estados
-typedef enum state_ {connectWifi, connectServer, waitEvent, sendTempHumiTime, sendTempHumiBtn} state; // off: valor 0, on: valor 1 e end: valor 2.
+typedef enum state_ {connectWifi, connectServerUbi, waitEvent, sendTempHumiTime, sendTempHumiBtn} state; // off: valor 0, on: valor 1 e end: valor 2.
 
 // estrutura que define as transicoes dos estados
-state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, connectServer, connectWifi, connectWifi, connectWifi, connectWifi}, // Implementar transicoes entre estados. Matriz Estados X Eventos. 
-                                                   {connectServer, connectServer, connectServer, waitEvent, connectServer, connectServer, connectServer},//
+state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, connectServerUbi, connectWifi, connectWifi, connectWifi, connectWifi}, // Implementar transicoes entre estados. Matriz Estados X Eventos. 
+                                                   {connectServerUbi, connectServerUbi, connectServerUbi, waitEvent, connectServerUbi, connectServerUbi, connectServerUbi},//
                                                    {sendTempHumiBtn, sendTempHumiTime, waitEvent, waitEvent, waitEvent, waitEvent, waitEvent},
-                                                   {sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, connectWifi, connectServer, waitEvent},
-                                                   {sendTempHumiBtn,sendTempHumiBtn, sendTempHumiBtn, sendTempHumiBtn, connectWifi, connectServer, waitEvent}
+                                                   {sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, sendTempHumiTime, connectWifi, connectServerUbi, waitEvent},
+                                                   {sendTempHumiBtn,sendTempHumiBtn, sendTempHumiBtn, sendTempHumiBtn, connectWifi, connectServerUbi, waitEvent}
                                                    };
 // definicao dos estados inicial e final
 #define EXIT_STATE connectWifi //trocar caso for ter um estado de saida
