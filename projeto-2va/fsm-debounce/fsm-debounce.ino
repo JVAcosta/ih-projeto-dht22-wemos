@@ -46,8 +46,8 @@ void sendTempHumi(){
   Serial.println(" Celsius");
   String humStr = String(hum);
   String tempStr = String(temp);
-  client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\":  tempStr }");
-  client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": humStr }");
+  //client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\":  tempStr }");
+  //client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": humStr }");
 }
 
 boolean read_button() {
@@ -137,6 +137,7 @@ event sendTempHumiBtn_state(void) {
   Serial.print("Send temp/Hum button");
   sendTempHumi();
   client.publish("/v1.6/devices/infra-hardware/button", "{\"value\": 1}");
+  client.subscribe("inTopic");
     if ( WiFi.status() != WL_CONNECTED) {
     return reconnectWifi;
   } else if(!client.connected()){
