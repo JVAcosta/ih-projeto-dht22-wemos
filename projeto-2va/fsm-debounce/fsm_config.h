@@ -29,8 +29,8 @@ state state_transitions[NUM_STATES][NUM_EVENTS] = {{connectWifi, connectWifi, co
 
 // funcao que implementa a transicao de estados.
 state lookup_transitions(state cur_state, event cur_evt) { // Mapeamento da Matriz Estados X Eventos.
-  Serial.println("next event:");
-  Serial.print(state_transitions[cur_state][cur_evt]);
+  //Serial.println("next event:");
+  //Serial.print(state_transitions[cur_state][cur_evt]);
   return state_transitions[cur_state][cur_evt];
 }
 

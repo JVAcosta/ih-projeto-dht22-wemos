@@ -1,7 +1,3 @@
-
-
-
-
 #include <DHT.h>
 #include "fsm_config.h"
 #include <ESP8266WiFi.h>
@@ -15,7 +11,6 @@ const char* mqtt_server = "things.ubidots.com";
 const int buttonPin = D5;    // definicao do pino utilizado pelo botao
 const int ledPin = D7;
 
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -27,13 +22,14 @@ int buttonState = LOW;             // armazena a leitura atual do botao
 int lastButtonState = LOW;         // armazena a leitura anterior do botao
 unsigned long lastDebounceTime = 0;  // armazena a ultima vez que a leitura da entrada variou
 unsigned long debounceDelay = 50;    // tempo utilizado para implementar o debounce
-unsigned long previusTime ;
+unsigned long previusTime = millis();
+unsigned char counter = 0;
+unsigned int interval=100;
 
 //Constants
 #define DHTPIN D3     // what pin we're connected to
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
-
 
 //Variables
 int chk;
@@ -43,9 +39,9 @@ float temp; //Stores temperature value
 void sendTempHumi(){
   hum = dht.readHumidity();
   temp= dht.readTemperature();
-  Serial.print("Humidity: ");
+  Serial.println("Humidity: ");
   Serial.print(hum);
-  Serial.print(" %, Temp: ");
+  Serial.println(" %, Temp: ");
   Serial.print(temp);
   Serial.println(" Celsius");
   String humStr = String(hum);
@@ -53,7 +49,6 @@ void sendTempHumi(){
   client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\":  tempStr }");
   client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": humStr }");
 }
-
 
 boolean read_button() {
   int reading = digitalRead(buttonPin);
@@ -74,24 +69,8 @@ boolean read_button() {
   }
   return false;
 }
-// definicao das funcoes relativas a cada estado
-/*event off_state(void) {
-  digitalWrite(ledPin, LOW);
-  if(read_button())
-    return btn_pressed;
-  else
-    return repeat;
-}
-*/
 
-/*event on_state(void) {
-  digitalWrite(ledPin, HIGH);
-  if(read_button())
-    return btn_pressed;
-  else
-    return repeat;
-}
-*/
+// definicao das funcoes relativas a cada estado
 event connectWifi_state(void) {
     delay(10);
   // We start by connecting to a WiFi network
@@ -119,7 +98,6 @@ event connectServer_state(void) {
       Serial.println("connected");
       client.subscribe("inTopic");
       return serverIsConnected;
-
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -131,31 +109,26 @@ event connectServer_state(void) {
 }
 
 event waitEvent_state(void) {
-  Serial.print("wait event state...");
-  previusTime = micros();
-  
-  while ( (read_button() != 1) && ((micros() - previusTime) < 10000 )){
-    Serial.println(micros() - previusTime);
-     
-  }
-  if (read_button()){
-      Serial.println(read_button());
+  Serial.println("wait event state...");
+   if (read_button()){
+      //Serial.println(read_button());
+      previusTime = millis();
       return btn_pressed;
-    }
-  return time10;
+    }else if ((millis() - previusTime) > 10000 ){
+      //Serial.println(millis() - previusTime);
+      previusTime = millis();      
+      return time10;
+      }
+    return backToWaitEvent;
 }
 
 event sendTempHumiTime_state(void) {
   Serial.print("Send temp/Hum time");
   sendTempHumi();
   if ( WiFi.status() != WL_CONNECTED) {
-
     return reconnectWifi;
-
   } else if(!client.connected()){
-
     return reconnectServer;
-
   }
   return backToWaitEvent;
 }
@@ -165,18 +138,12 @@ event sendTempHumiBtn_state(void) {
   sendTempHumi();
   client.publish("/v1.6/devices/infra-hardware/button", "{\"value\": 1}");
     if ( WiFi.status() != WL_CONNECTED) {
-
     return reconnectWifi;
-
   } else if(!client.connected()){
-
     return reconnectServer;
-
   }
   return backToWaitEvent;
 }
-  
-
 
 // variaveis que armazenam estado atual, evento atual e funcao de tratamento do estado atual
 state cur_state = ENTRY_STATE;
@@ -195,14 +162,14 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("loop");
-  Serial.print("state in :");
-  Serial.print(cur_state);
+  //Serial.println("loop");
+  //Serial.println("state in :");
+  //Serial.print(cur_state);
   cur_state_function = state_functions[cur_state];
   cur_evt = (event) cur_state_function();
   /*if (EXIT_STATE == cur_state)
     return;*/
   cur_state = lookup_transitions(cur_state, cur_evt);
-  Serial.println("state out :");
-  Serial.print(cur_state);
+  //Serial.println("state out :");
+  //Serial.print(cur_state);
 }
