@@ -1,7 +1,7 @@
 
 
 
-
+#include <DHT.h>
 #include "fsm_config.h"
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -26,8 +26,18 @@ int buttonState = LOW;             // armazena a leitura atual do botao
 int lastButtonState = LOW;         // armazena a leitura anterior do botao
 unsigned long lastDebounceTime = 0;  // armazena a ultima vez que a leitura da entrada variou
 unsigned long debounceDelay = 50;    // tempo utilizado para implementar o debounce
+unsigned long previusTime ;
+
+//Constants
+#define DHTPIN D4     // what pin we're connected to
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 
 
+//Variables
+int chk;
+float hum;  //Stores humidity value
+float temp; //Stores temperature value
 // definicao das funcoes relativas a cada estado
 /*event off_state(void) {
   digitalWrite(ledPin, LOW);
@@ -72,6 +82,7 @@ event connectWifi_state(void) {
 event connectServer_state(void) {
   Serial.print("Attempting MQTT connection...");
   if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
+      delay(10);
       Serial.println("connected");
       client.subscribe("inTopic");
       return serverIsConnected;
@@ -89,15 +100,62 @@ event connectServer_state(void) {
 }
 
 event waitEvent_state(void) {
-  
+  previusTime = millis();
+  while ((previusTime - millis()) < 10000 ){
+
+    if (read_button() == 1){
+      return btn_pressed
+    }
+  }
+  return time10
 }
+
 event sendTempHumiTime_state(void) {
-  
+  Serial.print("Send temp/Hum time");
+  sendTempHumi()
+  if ( WiFi.status() != WL_CONNECTED) {
+
+    return reconnectWifi
+
+  } else if(!client.connected()){
+
+    return reconnectServer
+
+  }
+  return backToWaitEvent
 }
+
 event sendTempHumiBtn_state(void) {
+  Serial.print("Send temp/Hum button");
+  sendTempHumi()
+  client.publish("/v1.6/devices/infra-hardware/button", "{\"value\": 1}");
+    if ( WiFi.status() != WL_CONNECTED) {
+
+    return reconnectWifi
+
+  } else if(!client.connected()){
+
+    return reconnectServer
+    
+  }
+  return backToWaitEvent
+}
   
 }
 
+void sendTempHumi(){
+  hum = dht.readHumidity();
+  temp= dht.readTemperature();
+  Serial.print("Humidity: ");
+  Serial.print(hum);
+  Serial.print(" %, Temp: ");
+  Serial.print(temp);
+  Serial.println(" Celsius");
+  String a = String(msg[0]);
+  String b = String(msg[1]);
+  client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\": "+ temp +"}");
+  client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": "+ hum +"}");
+}
 
 // variaveis que armazenam estado atual, evento atual e funcao de tratamento do estado atual
 state cur_state = ENTRY_STATE;
@@ -127,6 +185,8 @@ int read_button() {
 
 void setup() {
   Serial.begin(115200);
+  //Serial.begin(9600);
+  dht.begin();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
   client.setServer(mqtt_server, 1883);
