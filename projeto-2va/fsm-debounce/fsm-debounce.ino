@@ -133,6 +133,7 @@ event connectServer_state(void) {
 }
 
 event waitEvent_state(void) {
+  Serial.print("wait event state...");
   previusTime = millis();
   
   while ((previusTime - millis()) < 10000 ){
@@ -194,9 +195,14 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("loop");
+  Serial.print("state in :");
+  Serial.print(cur_state);
   cur_state_function = state_functions[cur_state];
   cur_evt = (event) cur_state_function();
   if (EXIT_STATE == cur_state)
     return;
   cur_state = lookup_transitions(cur_state, cur_evt);
+  Serial.println("state out :");
+  Serial.print(cur_state);
 }
