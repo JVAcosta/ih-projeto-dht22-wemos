@@ -81,7 +81,7 @@ event connectWifi_state(void) {
 }
 event connectServer_state(void) {
   Serial.print("Attempting MQTT connection...");
-  if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
+  if (client.connect("ESP8266Client","A1E-SLO6fJDKYwo4pXd9GewMXFCA9zBPBb","")) {
       delay(10);
       Serial.println("connected");
       client.subscribe("inTopic");
@@ -136,7 +136,7 @@ event sendTempHumiBtn_state(void) {
   } else if(!client.connected()){
 
     return reconnectServer
-    
+
   }
   return backToWaitEvent
 }
@@ -151,10 +151,10 @@ void sendTempHumi(){
   Serial.print(" %, Temp: ");
   Serial.print(temp);
   Serial.println(" Celsius");
-  String a = String(msg[0]);
-  String b = String(msg[1]);
-  client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\": "+ temp +"}");
-  client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": "+ hum +"}");
+  String humStr = String(hum);
+  String tempStr = String(temp);
+  client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\": "+ tempStr +"}");
+  client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": "+ humStr +"}");
 }
 
 // variaveis que armazenam estado atual, evento atual e funcao de tratamento do estado atual
