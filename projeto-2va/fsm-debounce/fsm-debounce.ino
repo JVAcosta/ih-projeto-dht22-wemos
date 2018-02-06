@@ -30,7 +30,7 @@ unsigned long debounceDelay = 50;    // tempo utilizado para implementar o debou
 unsigned long previusTime ;
 
 //Constants
-#define DHTPIN D4     // what pin we're connected to
+#define DHTPIN D3     // what pin we're connected to
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 
@@ -109,10 +109,8 @@ event connectWifi_state(void) {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  
   return wifiIsConnected;
 }
-
 
 event connectServer_state(void) {
   Serial.print("Attempting MQTT connection...");
@@ -134,14 +132,16 @@ event connectServer_state(void) {
 
 event waitEvent_state(void) {
   Serial.print("wait event state...");
-  previusTime = millis();
+  previusTime = micros();
   
-  while ((previusTime - millis()) < 10000 ){
-
-    if (read_button()){
+  while ( (read_button() != 1) && ((micros() - previusTime) < 10000 )){
+    Serial.println(micros() - previusTime);
+     
+  }
+  if (read_button()){
+      Serial.println(read_button());
       return btn_pressed;
     }
-  }
   return time10;
 }
 
@@ -186,8 +186,8 @@ event (* cur_state_function)(void);
 // implementacao de funcoes auxiliares
 
 void setup() {
-  Serial.begin(115200);
-  //Serial.begin(9600);
+  //Serial.begin(115200);
+  Serial.begin(9600);
   dht.begin();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
@@ -200,8 +200,8 @@ void loop() {
   Serial.print(cur_state);
   cur_state_function = state_functions[cur_state];
   cur_evt = (event) cur_state_function();
-  if (EXIT_STATE == cur_state)
-    return;
+  /*if (EXIT_STATE == cur_state)
+    return;*/
   cur_state = lookup_transitions(cur_state, cur_evt);
   Serial.println("state out :");
   Serial.print(cur_state);
