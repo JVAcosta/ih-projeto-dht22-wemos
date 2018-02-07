@@ -40,9 +40,9 @@ int x;
 void sendTempHumi(){
   hum = dht.readHumidity();
   temp = dht.readTemperature();
-  Serial.println("Humidity: ");
+  Serial.print("Humidity: ");
   Serial.print(hum);
-  Serial.println(" %, Temp: ");
+  Serial.print(" %, Temp: ");
   Serial.print(temp);
   Serial.println(" Celsius");
   String jsonHum = String("{\"value\":");
@@ -61,9 +61,9 @@ void sendTempHumi(){
       delay(10);
       Serial.println("connected");
       client.publish("/v1.6/devices/hardware/temp", tempp);
-      Serial.print(tempp);
+      //Serial.print(tempp);
       client.publish("/v1.6/devices/hardware/hum", humm);
-      Serial.print(humm);
+      //Serial.print(humm);
       ledpisca();
 }
 }
@@ -148,7 +148,7 @@ event waitEvent_state(void) {
 }
 
 event sendTempHumiTime_state(void) {
-  Serial.print("Send temp/Hum time");
+  Serial.println("Send temp/Hum time");
   sendTempHumi();
   if ( WiFi.status() != WL_CONNECTED) {
     return reconnectWifi;
@@ -159,11 +159,11 @@ event sendTempHumiTime_state(void) {
 }
 
 event sendTempHumiBtn_state(void) {
-  Serial.print("Send temp/Hum button");
+  Serial.println("Send temp/Hum button");
   sendTempHumi();
   if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
       delay(10);
-      Serial.println("connected");
+      //Serial.println("connected");
       client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
       ledpisca();
       //client.subscribe("inTopic");
