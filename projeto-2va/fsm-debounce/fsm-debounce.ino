@@ -35,19 +35,43 @@ DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 int chk;
 float hum;  //Stores humidity value
 float temp; //Stores temperature value
+int x;
 
 void sendTempHumi(){
   hum = dht.readHumidity();
-  temp= dht.readTemperature();
+  temp = dht.readTemperature();
   Serial.println("Humidity: ");
   Serial.print(hum);
   Serial.println(" %, Temp: ");
   Serial.print(temp);
   Serial.println(" Celsius");
-  String humStr = String(hum);
-  String tempStr = String(temp);
-  //client.publish("/v1.6/devices/infra-hardware/temp", "{\"value\":  tempStr }");
-  //client.publish("/v1.6/devices/infra-hardware/hum", "{\"value\": humStr }");
+  String jsonHum = String("{\"value\":");
+  String jsonTemp = String("{\"value\":");
+  
+  jsonHum.concat(hum);
+  jsonHum.concat("}");
+  jsonTemp.concat(temp);
+  jsonTemp.concat("}");
+  char humm[50];  
+  jsonHum.toCharArray(humm, 50);
+  char tempp[50];  
+  jsonTemp.toCharArray(tempp, 50);
+  
+  if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
+      delay(10);
+      Serial.println("connected");
+      client.publish("/v1.6/devices/hardware/temp", tempp);
+      Serial.print(tempp);
+      client.publish("/v1.6/devices/hardware/hum", humm);
+      Serial.print(humm);
+      ledpisca();
+}
+}
+
+void ledpisca(){
+  digitalWrite(ledPin, HIGH);
+  delay(200);
+  digitalWrite(ledPin, LOW);
 }
 
 boolean read_button() {
@@ -93,10 +117,11 @@ event connectWifi_state(void) {
 
 event connectServer_state(void) {
   Serial.print("Attempting MQTT connection...");
-  if (client.connect("ESP8266Client","A1E-SLO6fJDKYwo4pXd9GewMXFCA9zBPBb","")) {
+  if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
       delay(10);
       Serial.println("connected");
-      client.subscribe("inTopic");
+      //client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
+      //client.subscribe("inTopic");
       return serverIsConnected;
     } else {
       Serial.print("failed, rc=");
@@ -109,7 +134,7 @@ event connectServer_state(void) {
 }
 
 event waitEvent_state(void) {
-  Serial.println("wait event state...");
+  //Serial.println("wait event state...");
    if (read_button()){
       //Serial.println(read_button());
       previusTime = millis();
@@ -136,8 +161,14 @@ event sendTempHumiTime_state(void) {
 event sendTempHumiBtn_state(void) {
   Serial.print("Send temp/Hum button");
   sendTempHumi();
-  client.publish("/v1.6/devices/infra-hardware/button", "{\"value\": 1}");
-  client.subscribe("inTopic");
+  if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
+      delay(10);
+      Serial.println("connected");
+      client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
+      ledpisca();
+      //client.subscribe("inTopic");
+  }
+  //client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
     if ( WiFi.status() != WL_CONNECTED) {
     return reconnectWifi;
   } else if(!client.connected()){
@@ -154,8 +185,8 @@ event (* cur_state_function)(void);
 // implementacao de funcoes auxiliares
 
 void setup() {
-  //Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  //Serial.begin(9600);
   dht.begin();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
