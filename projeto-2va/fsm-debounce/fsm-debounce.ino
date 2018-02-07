@@ -40,6 +40,7 @@ int x;
 void sendTempHumi(){
   hum = dht.readHumidity();
   temp = dht.readTemperature();
+
   Serial.print("Humidity: ");
   Serial.print(hum);
   Serial.print(" %, Temp: ");
@@ -52,6 +53,7 @@ void sendTempHumi(){
   jsonHum.concat("}");
   jsonTemp.concat(temp);
   jsonTemp.concat("}");
+  
   char humm[50];  
   jsonHum.toCharArray(humm, 50);
   char tempp[50];  
@@ -61,9 +63,7 @@ void sendTempHumi(){
       delay(10);
       Serial.println("connected");
       client.publish("/v1.6/devices/hardware/temp", tempp);
-      //Serial.print(tempp);
       client.publish("/v1.6/devices/hardware/hum", humm);
-      //Serial.print(humm);
       ledpisca();
 }
 }
@@ -120,8 +120,6 @@ event connectServer_state(void) {
   if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
       delay(10);
       Serial.println("connected");
-      //client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
-      //client.subscribe("inTopic");
       return serverIsConnected;
     } else {
       Serial.print("failed, rc=");
@@ -134,13 +132,13 @@ event connectServer_state(void) {
 }
 
 event waitEvent_state(void) {
-  //Serial.println("wait event state...");
+
    if (read_button()){
-      //Serial.println(read_button());
+
       previusTime = millis();
       return btn_pressed;
     }else if ((millis() - previusTime) > 10000 ){
-      //Serial.println(millis() - previusTime);
+
       previusTime = millis();      
       return time10;
       }
@@ -163,12 +161,12 @@ event sendTempHumiBtn_state(void) {
   sendTempHumi();
   if (client.connect("ESP8266Client","A1E-Gl69HF0deyOv90xCmk1jffsJ7Ujk4U","")) {
       delay(10);
-      //Serial.println("connected");
+    
       client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
       ledpisca();
-      //client.subscribe("inTopic");
+
   }
-  //client.publish("/v1.6/devices/hardware/button", "{\"value\": 1}");
+
     if ( WiFi.status() != WL_CONNECTED) {
     return reconnectWifi;
   } else if(!client.connected()){
@@ -186,7 +184,6 @@ event (* cur_state_function)(void);
 
 void setup() {
   Serial.begin(115200);
-  //Serial.begin(9600);
   dht.begin();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
@@ -194,14 +191,11 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println("loop");
-  //Serial.println("state in :");
-  //Serial.print(cur_state);
+
   cur_state_function = state_functions[cur_state];
   cur_evt = (event) cur_state_function();
   /*if (EXIT_STATE == cur_state)
     return;*/
   cur_state = lookup_transitions(cur_state, cur_evt);
-  //Serial.println("state out :");
-  //Serial.print(cur_state);
+
 }
